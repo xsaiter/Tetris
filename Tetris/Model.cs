@@ -33,7 +33,7 @@ namespace Tetris {
     public class Piece {
         public Types Type { get; set; }
         public int Orientation { get; set; }
-        public int[] Items { get; } = MakeItems();
+        public int[] V { get; } = MakeItems();
 
         public static int[] MakeItems() => new int[N];
         public const int N = 4;

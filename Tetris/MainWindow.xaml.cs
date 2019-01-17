@@ -14,7 +14,7 @@ namespace Tetris {
         
         readonly List<Cell> _cells = new List<Cell>();
         readonly Piece _piece = new Piece();
-        readonly int[] _items = Piece.MakeItems();
+        readonly int[] _v = Piece.MakeItems();
         readonly List<int> _range = Enumerable.Range(0, Piece.N).ToList();
 
         int _rows, _cols, _n;
@@ -140,9 +140,9 @@ namespace Tetris {
             ShowPiece();
         }
 
-        void PreMoveToDown() => _range.ForEach(i => _items[i] = _piece.Items[i] + _cols);
+        void PreMoveToDown() => _range.ForEach(i => _v[i] = _piece.V[i] + _cols);
 
-        bool CanMoveToDown() => _range.All(i => (_items[i] / _cols < _rows) && _cells[_items[i]].Empty);
+        bool CanMoveToDown() => _range.All(i => (_v[i] / _cols < _rows) && _cells[_v[i]].Empty);
 
         void RemoveCompletedLines() {
             var need = true;
@@ -169,7 +169,7 @@ namespace Tetris {
         }
 
         void MovePiece() {
-            _range.ForEach(i => _piece.Items[i] = _items[i]);
+            _range.ForEach(i => _piece.V[i] = _v[i]);
         }
 
         void ResetPiece() {
@@ -177,7 +177,7 @@ namespace Tetris {
         }
 
         void SetItemTypes(Piece.Types type) {
-            _range.ForEach(i => _cells[_piece.Items[i]].Type = type);
+            _range.ForEach(i => _cells[_piece.V[i]].Type = type);
         }
 
         void ResetBoard() {
@@ -185,7 +185,7 @@ namespace Tetris {
         }
 
         bool IsGameOver() {
-            return _range.Any(i => !_cells[_piece.Items[i]].Empty);
+            return _range.Any(i => !_cells[_piece.V[i]].Empty);
         }
 
         void GameOver() {
@@ -224,7 +224,7 @@ namespace Tetris {
             }
         }
 
-        void PreMoveToRight() => _range.ForEach(i => _items[i] = _piece.Items[i] + 1);
+        void PreMoveToRight() => _range.ForEach(i => _v[i] = _piece.V[i] + 1);
 
         bool CanMoveToRight() => CheckBounds() && _range.All(i => Delta(i) > 0);
 
@@ -236,11 +236,11 @@ namespace Tetris {
             }
         }
 
-        void PreMoveToLeft() => _range.ForEach(i => _items[i] = _piece.Items[i] - 1);
+        void PreMoveToLeft() => _range.ForEach(i => _v[i] = _piece.V[i] - 1);
 
         bool CanMoveToLeft() => CheckBounds() && _range.All(i => Delta(i) < 0);
 
-        int Delta(int i) => _items[i] % _cols - _piece.Items[i] % _cols;
+        int Delta(int i) => _v[i] % _cols - _piece.V[i] % _cols;
 
         void Pause() {
             if (_timer.IsEnabled) {
@@ -255,7 +255,7 @@ namespace Tetris {
             GetMaster().Rotate();
         }
 
-        bool CheckBounds() => _range.All(i => _items[i] >= 0 && _items[i] < _n && _cells[_items[i]].Empty);
+        bool CheckBounds() => _range.All(i => _v[i] >= 0 && _v[i] < _n && _cells[_v[i]].Empty);
 
         void OnPause(object sender, RoutedEventArgs e) {
             if (_isActive) {
@@ -327,29 +327,29 @@ namespace Tetris {
 
         void PreMakePiece() {
             _piece.Orientation = 0;
-            _piece.Items[0] = (_cols - 4) / 2;
+            _piece.V[0] = (_cols - 4) / 2;
         }
 
         void Prepare_I(Master master) {
             master.MakePiece = () => {
                 PreMakePiece();
-                _piece.Items[1] = _piece.Items[0] + 1;
-                _piece.Items[2] = _piece.Items[1] + 1;
-                _piece.Items[3] = _piece.Items[2] + 1;
+                _piece.V[1] = _piece.V[0] + 1;
+                _piece.V[2] = _piece.V[1] + 1;
+                _piece.V[3] = _piece.V[2] + 1;
             };
             master.Rotate = () => {
                 switch (_piece.Orientation) {
                     case 0:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] + _cols - 1;
-                        _items[2] = _piece.Items[2] + 2 * _cols - 2;
-                        _items[3] = _piece.Items[3] + 3 * _cols - 3;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] + _cols - 1;
+                        _v[2] = _piece.V[2] + 2 * _cols - 2;
+                        _v[3] = _piece.V[3] + 3 * _cols - 3;
                         break;
                     case 1:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] - _cols + 1;
-                        _items[2] = _piece.Items[2] - 2 * _cols + 2;
-                        _items[3] = _piece.Items[3] - 3 * _cols + 3;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] - _cols + 1;
+                        _v[2] = _piece.V[2] - 2 * _cols + 2;
+                        _v[3] = _piece.V[3] - 3 * _cols + 3;
                         break;
                 }
                 Rotate(2);
@@ -359,9 +359,9 @@ namespace Tetris {
         void Prepare_O(Master master) {
             master.MakePiece = () => {
                 PreMakePiece();
-                _piece.Items[1] = _piece.Items[0] + 1;
-                _piece.Items[2] = _piece.Items[0] + _cols;
-                _piece.Items[3] = _piece.Items[1] + _cols;
+                _piece.V[1] = _piece.V[0] + 1;
+                _piece.V[2] = _piece.V[0] + _cols;
+                _piece.V[3] = _piece.V[1] + _cols;
             };
             master.Rotate = () => { };
         }
@@ -369,35 +369,35 @@ namespace Tetris {
         void Prepare_J(Master master) {
             master.MakePiece = () => {
                 PreMakePiece();
-                _piece.Items[1] = _piece.Items[0] + 1;
-                _piece.Items[2] = _piece.Items[0] + _cols;
-                _piece.Items[3] = _piece.Items[2] + _cols;
+                _piece.V[1] = _piece.V[0] + 1;
+                _piece.V[2] = _piece.V[0] + _cols;
+                _piece.V[3] = _piece.V[2] + _cols;
             };
             master.Rotate = () => {
                 switch (_piece.Orientation) {
                     case 0:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] + _cols - 1;
-                        _items[2] = _piece.Items[2] - _cols - 1;
-                        _items[3] = _piece.Items[3] - 2 * _cols - 2;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] + _cols - 1;
+                        _v[2] = _piece.V[2] - _cols - 1;
+                        _v[3] = _piece.V[3] - 2 * _cols - 2;
                         break;
                     case 1:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] - _cols - 1;
-                        _items[2] = _piece.Items[2] - _cols + 1;
-                        _items[3] = _piece.Items[3] - 2 * _cols + 2;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] - _cols - 1;
+                        _v[2] = _piece.V[2] - _cols + 1;
+                        _v[3] = _piece.V[3] - 2 * _cols + 2;
                         break;
                     case 2:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] - _cols + 1;
-                        _items[2] = _piece.Items[2] + _cols + 1;
-                        _items[3] = _piece.Items[3] + 2 * _cols + 2;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] - _cols + 1;
+                        _v[2] = _piece.V[2] + _cols + 1;
+                        _v[3] = _piece.V[3] + 2 * _cols + 2;
                         break;
                     case 3:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] + _cols + 1;
-                        _items[2] = _piece.Items[2] + _cols - 1;
-                        _items[3] = _piece.Items[3] + 2 * _cols - 2;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] + _cols + 1;
+                        _v[2] = _piece.V[2] + _cols - 1;
+                        _v[3] = _piece.V[3] + 2 * _cols - 2;
                         break;
                 }
                 Rotate(4);
@@ -407,35 +407,35 @@ namespace Tetris {
         void Prepare_L(Master master) {
             master.MakePiece = () => {
                 PreMakePiece();
-                _piece.Items[1] = _piece.Items[0] - 1;
-                _piece.Items[2] = _piece.Items[0] + _cols;
-                _piece.Items[3] = _piece.Items[2] + _cols;
+                _piece.V[1] = _piece.V[0] - 1;
+                _piece.V[2] = _piece.V[0] + _cols;
+                _piece.V[3] = _piece.V[2] + _cols;
             };
             master.Rotate = () => {
                 switch (_piece.Orientation) {
                     case 0:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] - _cols + 1;
-                        _items[2] = _piece.Items[2] - _cols - 1;
-                        _items[3] = _piece.Items[3] - 2 * _cols - 2;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] - _cols + 1;
+                        _v[2] = _piece.V[2] - _cols - 1;
+                        _v[3] = _piece.V[3] - 2 * _cols - 2;
                         break;
                     case 1:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] + _cols + 1;
-                        _items[2] = _piece.Items[2] - _cols + 1;
-                        _items[3] = _piece.Items[3] - 2 * _cols + 2;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] + _cols + 1;
+                        _v[2] = _piece.V[2] - _cols + 1;
+                        _v[3] = _piece.V[3] - 2 * _cols + 2;
                         break;
                     case 2:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] + _cols - 1;
-                        _items[2] = _piece.Items[2] + _cols + 1;
-                        _items[3] = _piece.Items[3] + 2 * _cols + 2;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] + _cols - 1;
+                        _v[2] = _piece.V[2] + _cols + 1;
+                        _v[3] = _piece.V[3] + 2 * _cols + 2;
                         break;
                     case 3:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] - _cols - 1;
-                        _items[2] = _piece.Items[2] + _cols - 1;
-                        _items[3] = _piece.Items[3] + 2 * _cols - 2;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] - _cols - 1;
+                        _v[2] = _piece.V[2] + _cols - 1;
+                        _v[3] = _piece.V[3] + 2 * _cols - 2;
                         break;
                 }
                 Rotate(4);
@@ -445,23 +445,23 @@ namespace Tetris {
         void Prepare_Z(Master master) {
             master.MakePiece = () => {
                 PreMakePiece();
-                _piece.Items[1] = _piece.Items[0] - 1;
-                _piece.Items[2] = _piece.Items[0] + _cols;
-                _piece.Items[3] = _piece.Items[0] + _cols + 1;
+                _piece.V[1] = _piece.V[0] - 1;
+                _piece.V[2] = _piece.V[0] + _cols;
+                _piece.V[3] = _piece.V[0] + _cols + 1;
             };
             master.Rotate = () => {
                 switch (_piece.Orientation) {
                     case 0:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] - _cols + 1;
-                        _items[2] = _piece.Items[2] - _cols - 1;
-                        _items[3] = _piece.Items[3] - 2;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] - _cols + 1;
+                        _v[2] = _piece.V[2] - _cols - 1;
+                        _v[3] = _piece.V[3] - 2;
                         break;
                     case 1:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] + _cols - 1;
-                        _items[2] = _piece.Items[2] + _cols + 1;
-                        _items[3] = _piece.Items[3] + 2;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] + _cols - 1;
+                        _v[2] = _piece.V[2] + _cols + 1;
+                        _v[3] = _piece.V[3] + 2;
                         break;
                 }
                 Rotate(2);
@@ -471,23 +471,23 @@ namespace Tetris {
         void Prepare_S(Master master) {
             master.MakePiece = () => {
                 PreMakePiece();
-                _piece.Items[1] = _piece.Items[0] + 1;
-                _piece.Items[2] = _piece.Items[0] + _cols;
-                _piece.Items[3] = _piece.Items[0] + _cols - 1;
+                _piece.V[1] = _piece.V[0] + 1;
+                _piece.V[2] = _piece.V[0] + _cols;
+                _piece.V[3] = _piece.V[0] + _cols - 1;
             };
             master.Rotate = () => {
                 switch (_piece.Orientation) {
                     case 0:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] + _cols - 1;
-                        _items[2] = _piece.Items[2] - _cols - 1;
-                        _items[3] = _piece.Items[3] - 2 * _cols;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] + _cols - 1;
+                        _v[2] = _piece.V[2] - _cols - 1;
+                        _v[3] = _piece.V[3] - 2 * _cols;
                         break;
                     case 1:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] - _cols + 1;
-                        _items[2] = _piece.Items[2] + _cols + 1;
-                        _items[3] = _piece.Items[3] + 2 * _cols;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] - _cols + 1;
+                        _v[2] = _piece.V[2] + _cols + 1;
+                        _v[3] = _piece.V[3] + 2 * _cols;
                         break;
                 }
                 Rotate(2);
@@ -497,35 +497,35 @@ namespace Tetris {
         void Prepare_T(Master master) {
             master.MakePiece = () => {
                 PreMakePiece();
-                _piece.Items[1] = _piece.Items[0] - 1;
-                _piece.Items[2] = _piece.Items[0] + 1;
-                _piece.Items[3] = _piece.Items[0] + _cols;
+                _piece.V[1] = _piece.V[0] - 1;
+                _piece.V[2] = _piece.V[0] + 1;
+                _piece.V[3] = _piece.V[0] + _cols;
             };
             master.Rotate = () => {
                 switch (_piece.Orientation) {
                     case 0:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] - _cols + 1;
-                        _items[2] = _piece.Items[2] + _cols - 1;
-                        _items[3] = _piece.Items[3] - _cols - 1;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] - _cols + 1;
+                        _v[2] = _piece.V[2] + _cols - 1;
+                        _v[3] = _piece.V[3] - _cols - 1;
                         break;
                     case 1:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] + _cols + 1;
-                        _items[2] = _piece.Items[2] - _cols - 1;
-                        _items[3] = _piece.Items[3] - _cols + 1;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] + _cols + 1;
+                        _v[2] = _piece.V[2] - _cols - 1;
+                        _v[3] = _piece.V[3] - _cols + 1;
                         break;
                     case 2:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] + _cols - 1;
-                        _items[2] = _piece.Items[2] - _cols + 1;
-                        _items[3] = _piece.Items[3] + _cols + 1;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] + _cols - 1;
+                        _v[2] = _piece.V[2] - _cols + 1;
+                        _v[3] = _piece.V[3] + _cols + 1;
                         break;
                     case 3:
-                        _items[0] = _piece.Items[0];
-                        _items[1] = _piece.Items[1] - _cols - 1;
-                        _items[2] = _piece.Items[2] + _cols + 1;
-                        _items[3] = _piece.Items[3] + _cols - 1;
+                        _v[0] = _piece.V[0];
+                        _v[1] = _piece.V[1] - _cols - 1;
+                        _v[2] = _piece.V[2] + _cols + 1;
+                        _v[3] = _piece.V[3] + _cols - 1;
                         break;
                 }
                 Rotate(4);
